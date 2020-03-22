@@ -21,6 +21,7 @@ class Ant:
 
     def __init__(self):
         self.path = []
+        self.score = 0
         self.total_distance = 0
 
 class ACO:
@@ -32,7 +33,7 @@ class ACO:
         self.evaporation = evaporation  # 蒸發係數
         self.ants = []
         self.ants_size = ants_size
-        self.q = 500
+        self.q = 100
         self.pheromone = []             # 費洛蒙表
         self.distance = []              # 城市距離表
         self.best = 999999
@@ -88,15 +89,18 @@ class ACO:
             ant.path.append(0) # end point
 
             # local search
-            if random.random() < 0.6:
-                # start_point = random.randint(1, len(self.cities) - 2 - 1)
-                # temp = ant.path[start_point]
-                # ant.path[start_point] = ant.path[start_point + 2]
-                # ant.path[start_point + 2] = temp
-                start_point = random.randint(1, len(self.cities) - 4 - 1)
-                temp = ant.path[start_point: start_point + 4]
-                random.shuffle(temp)
-                ant.path[start_point:start_point + 4] = temp
+            if random.random() < 0.8:
+                start_point = random.randint(1, len(self.cities) - 3 - 1)
+                temp = ant.path[start_point]
+                ant.path[start_point] = ant.path[start_point + 3]
+                ant.path[start_point + 3] = temp
+                temp = ant.path[start_point + 1]
+                ant.path[start_point + 1] = ant.path[start_point + 2]
+                ant.path[start_point + 2] = temp
+                # start_point = random.randint(1, len(self.cities) - 4 - 1)
+                # temp = ant.path[start_point: start_point + 4]
+                # random.shuffle(temp)
+                # ant.path[start_point:start_point + 4] = temp
             
             # random switch
             # if random.random() < 0.5:
@@ -113,6 +117,10 @@ class ACO:
         for ant in self.ants:
             for i in range(len(ant.path) - 1):
                 distance = self.distance[ant.path[i]][ant.path[i + 1]]
+                if distance > 20:
+                    ant.score += distance * 100
+                else: 
+                    ant.score += distance
                 ant.total_distance += distance
             if ant.total_distance < self.generation_best:
                 self.generation_best = ant.total_distance
@@ -125,7 +133,7 @@ class ACO:
         pheromone_effects = [] # array of [c_from, c_to, value]
         for ant in self.ants:
             for i in range(len(ant.path) - 1):
-                pheromone_effects.append([ant.path[i], ant.path[i + 1], self.q / ant.total_distance])
+                pheromone_effects.append([ant.path[i], ant.path[i + 1], self.q / ant.score])
         for i in range(len(self.pheromone)):
             for j in range(len(self.pheromone)):
                 self.pheromone[i][j] *= self.evaporation
@@ -140,7 +148,7 @@ class ACO:
 
 if __name__ == '__main__':
 
-    show_graph = False
+    show_graph = True
     log_to_file = False
     best = 99999
     # params = {
@@ -153,7 +161,7 @@ if __name__ == '__main__':
     while True:
 
         # aco = ACO(params['ants'][random.randint(0, 2)], params['a'][random.randint(0, 1)], params['b'][random.randint(0, 2)], params['evaporation'][random.randint(0, 3)])
-        aco = ACO(10, 1, 3, 0.9)
+        aco = ACO(50, 1, 3, 0.5)
 
         with open('eil51.tsp', 'r') as f:
             while True:
