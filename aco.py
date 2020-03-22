@@ -118,7 +118,7 @@ class ACO:
             for i in range(len(ant.path) - 1):
                 distance = self.distance[ant.path[i]][ant.path[i + 1]]
                 if distance > 20:
-                    ant.score += distance * 100
+                    ant.score += distance * 10
                 else: 
                     ant.score += distance
                 ant.total_distance += distance
@@ -161,7 +161,7 @@ if __name__ == '__main__':
     while True:
 
         # aco = ACO(params['ants'][random.randint(0, 2)], params['a'][random.randint(0, 1)], params['b'][random.randint(0, 2)], params['evaporation'][random.randint(0, 3)])
-        aco = ACO(50, 1, 3, 0.5)
+        aco = ACO(20, 1, 4, 0.9)
 
         with open('eil51.tsp', 'r') as f:
             while True:
@@ -177,20 +177,23 @@ if __name__ == '__main__':
         # draw result
         if show_graph:
             plt.ion()
-            fig = plt.figure(figsize=(16, 5))
-            sub_best = fig.add_subplot(131)
+            fig = plt.figure(figsize=(13, 13))
+            sub_best = fig.add_subplot(221)
             sub_best.axis([0, 70, 0, 80])
-            sub_pheromone = fig.add_subplot(132)
+            sub_pheromone = fig.add_subplot(223)
             sub_pheromone.axis([0, 70, 0, 80])
-            sub_gen_best = fig.add_subplot(133)
+            sub_gen_best = fig.add_subplot(224)
             sub_gen_best.axis([0, 70, 0, 80])
+            sub_result = fig.add_subplot(222)
 
 
         # run algorithm
         aco.initialize()
+        results = []
         for i in range(1000000):
             aco.next_generation()
-            if i % 300 == 0:
+            results.append(aco.generation_best)
+            if i % 200 == 0:
                 if aco.best < best and log_to_file:
                     best = aco.best
                     with open('aco_results.txt', 'a') as f:
@@ -198,12 +201,14 @@ if __name__ == '__main__':
                         f.write(line)
                 # clear pheromone
                 aco.initialize()
-            if i % 100 == 0:
+                results = []
+            if (i+1) % 100 == 0:
                 print(round(aco.best, 2), round(aco.generation_best, 2), 'GEN', str(i + 1))
                 if show_graph:
                     sub_best.cla()
                     sub_pheromone.cla()
                     sub_gen_best.cla()
+                    sub_result.cla()
                     # draw cities
                     for c in aco.cities:
                         sub_best.scatter(c.x, c.y)
@@ -222,6 +227,8 @@ if __name__ == '__main__':
                         x1, x2 = aco.cities[aco.generation_best_path[i]].x, aco.cities[aco.generation_best_path[i + 1]].x
                         y1, y2 = aco.cities[aco.generation_best_path[i]].y, aco.cities[aco.generation_best_path[i + 1]].y
                         sub_gen_best.plot([x1, x2], [y1, y2], 'orange')
+                    # draw results
+                    sub_result.plot(results)
                     # draw pheromone 
                     total_pheromone = 0
                     for i in range(len(aco.cities)):
@@ -238,7 +245,7 @@ if __name__ == '__main__':
                         for j in range(len(aco.cities)):
                             x1, x2 = aco.cities[i].x, aco.cities[j].x
                             y1, y2 = aco.cities[i].y, aco.cities[j].y
-                            sub_pheromone.plot([x1, x2], [y1, y2], 'blue', alpha=50 * normalized_pheromone[i][j])
+                            sub_pheromone.plot([x1, x2], [y1, y2], 'blue', alpha=40 * normalized_pheromone[i][j])
                     
                     fig.canvas.draw()
                     fig.canvas.flush_events()
