@@ -32,7 +32,7 @@ class ACO:
         self.evaporation = evaporation  # 蒸發係數
         self.ants = []
         self.ants_size = ants_size
-        self.q = 500
+        self.q = 100
         self.pheromone = []             # 費洛蒙表
         self.distance = []              # 城市距離表
         self.best = 999999
@@ -89,14 +89,19 @@ class ACO:
 
             # local search
             if random.random() < 0.6:
-                # start_point = random.randint(1, len(self.cities) - 2 - 1)
-                # temp = ant.path[start_point]
-                # ant.path[start_point] = ant.path[start_point + 2]
-                # ant.path[start_point + 2] = temp
+                # Method 1: reverse
                 start_point = random.randint(1, len(self.cities) - 4 - 1)
-                temp = ant.path[start_point: start_point + 4]
-                random.shuffle(temp)
-                ant.path[start_point:start_point + 4] = temp
+                temp = ant.path[start_point]
+                ant.path[start_point] = ant.path[start_point + 3]
+                ant.path[start_point + 3] = temp
+                temp = ant.path[start_point + 1]
+                ant.path[start_point + 1] = ant.path[start_point + 2]
+                ant.path[start_point + 2] = temp
+                # Method 2: shuffle
+                # start_point = random.randint(1, len(self.cities) - 4 - 1)
+                # temp = ant.path[start_point: start_point + 4]
+                # random.shuffle(temp)
+                # ant.path[start_point:start_point + 4] = temp
             
             # random switch
             # if random.random() < 0.5:
@@ -153,7 +158,7 @@ if __name__ == '__main__':
     while True:
 
         # aco = ACO(params['ants'][random.randint(0, 2)], params['a'][random.randint(0, 1)], params['b'][random.randint(0, 2)], params['evaporation'][random.randint(0, 3)])
-        aco = ACO(10, 1, 3, 0.9)
+        aco = ACO(50, 1, 2, 0.5)
 
         with open('eil51.tsp', 'r') as f:
             while True:
@@ -186,7 +191,7 @@ if __name__ == '__main__':
                 if aco.best < best and log_to_file:
                     best = aco.best
                     with open('aco_results.txt', 'a') as f:
-                        line = datetime.now().strftime('%Y-%m-%d %H:%M:%S ') + 'ants:10 alpha:1 beta:3 evaporation:0.9 iteration:300 RESULT: ' + str(round(aco.best, 2)) + ' PATH: ' + str(aco.bestpath) + '\n'
+                        line = datetime.now().strftime('%Y-%m-%d %H:%M:%S ') + 'ants:50 alpha:1 beta:2 evaporation:0.5 iteration:300 RESULT: ' + str(round(aco.best, 2)) + ' PATH: ' + str(aco.bestpath) + '\n'
                         f.write(line)
                 # clear pheromone
                 aco.initialize()
