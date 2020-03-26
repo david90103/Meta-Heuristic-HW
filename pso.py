@@ -44,7 +44,7 @@ class Pso:
 
     def next_iteration(self):
         for p in self.particles:
-            p.v = self.w * p.v + np.random.rand(2, 1) * self.c1 * (p.p_best - p.x) + np.random.rand(2, 1) * self.c2 * (self.g_best - p.x)
+            p.v = self.w * p.v + np.random.rand() * self.c1 * (p.p_best - p.x) + np.random.rand() * self.c2 * (self.g_best - p.x)
             p.x += p.v
             value = self.ackley(p.x)
             if value < p.p_best_value:
@@ -57,29 +57,42 @@ class Pso:
 
 
 if __name__ == '__main__':
-    pso = Pso(100, 0.5, 0.2, 0.2)
 
-    X1 = np.arange(-40, 40, 0.25)
-    X2 = np.arange(-40, 40, 0.25)
+    pso = Pso(30, 0.3, 0.3, 0.4)
+
+    # draw ackley function
+    X1 = np.arange(-0.5, 0.5, 0.005)
+    X2 = np.arange(-0.5, 0.5, 0.005)
     Z = np.empty((len(X1), len(X2)))
     X1, X2 = np.meshgrid(X1, X2)
-
-    for i in range(3):
-        pso.next_iteration()
-
-    fig = plt.figure(figsize=(14, 5))
-    
-    ax = fig.add_subplot(121, projection='3d')
-    bx = fig.add_subplot(122)
-
     for i in range(len(X1)):
         for j in range(len(X2)):
             Z[i][j] = pso.ackley(X1[i][j], X2[i][j])
+
+    plt.ion()
+    fig = plt.figure(figsize=(14, 6))
+    ax = fig.add_subplot(121, projection='3d')
+    bx = fig.add_subplot(122)
+
+    for i in range(30):
+        pso.next_iteration()
+
+        ax.cla()
+        bx.cla()
+        bx.axis([-20, 20, -20, 20])
+
+        # draw ackley function
+        ax.plot_surface(X1, X2, Z, cmap=cm.coolwarm, antialiased=False, alpha=0.2)
         
-    ax.plot_surface(X1, X2, Z, cmap=cm.coolwarm, antialiased=False, alpha=0.3)
+        # draw particles
+        for p in pso.particles:
+            ax.scatter(p.x[0], p.x[1], pso.ackley(p.x))
+            bx.scatter(p.x[0], p.x[1])
 
-    for p in pso.particles:
-        ax.scatter(p.x[0], p.x[1], pso.ackley(p.x))
+        fig.canvas.draw()
+        fig.canvas.flush_events()
 
-    fig.show()
-    input()
+    print('Best score: ' + str(round(pso.g_best_value, 4)) + ' at ' + str(pso.g_best))
+    
+    plt.ioff()
+    plt.show()
