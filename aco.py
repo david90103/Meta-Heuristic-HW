@@ -158,7 +158,7 @@ if __name__ == '__main__':
     while True:
 
         # aco = ACO(params['ants'][random.randint(0, 2)], params['a'][random.randint(0, 1)], params['b'][random.randint(0, 2)], params['evaporation'][random.randint(0, 3)])
-        aco = ACO(50, 1, 2, 0.5)
+        aco = ACO(50, 1, 1.5, 0.3)
 
         with open('eil51.tsp', 'r') as f:
             while True:
